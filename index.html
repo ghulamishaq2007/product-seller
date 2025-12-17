@@ -104,18 +104,18 @@
   function sendOrder() {
     if (!allowedSellers.includes(sellerEmail)) return;
 
-    // ===== LOCATION CHECK =====
     if (!navigator.geolocation) {
-      alert('Geolocation is not supported by your browser.');
+      alert('Please enable location to place your order.');
       return;
     }
 
     navigator.geolocation.getCurrentPosition(
       function(position) {
-        const latitude = position.coords.latitude;
-        const longitude = position.coords.longitude;
+        const lat = position.coords.latitude;
+        const lng = position.coords.longitude;
 
-        // ===== PROCEED WITH ORDER =====
+        const mapLink = `https://www.google.com/maps?q=${lat},${lng}`;
+
         const name = customerName.value.trim();
         const phone = customerNumber.value.trim();
         const address = customerAddress.value.trim();
@@ -132,7 +132,6 @@
           return;
         }
 
-        // ===== CREATE TEMP FORM (FormSubmit Compatible) =====
         const form = document.createElement('form');
         form.action = `https://formsubmit.co/${sellerEmail}`;
         form.method = 'POST';
@@ -143,16 +142,15 @@
           <input type="hidden" name="Address" value="${address}">
           <input type="hidden" name="Items" value="${itemsVal}">
           <input type="hidden" name="Amount (PKR)" value="${amountVal}">
-          <input type="hidden" name="Latitude" value="${latitude}">
-          <input type="hidden" name="Longitude" value="${longitude}">
+          <input type="hidden" name="📍 Customer Location" value="${mapLink}">
           <input type="hidden" name="_captcha" value="false">
         `;
 
         document.body.appendChild(form);
         form.submit();
       },
-      function(error) {
-        alert('Please enable location to place your order.');
+      function() {
+        alert('Please turn ON location to place your order.');
       }
     );
   }
@@ -160,6 +158,7 @@
 
 </body>
 </html>
+
 
 
 
