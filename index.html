@@ -104,43 +104,63 @@
   function sendOrder() {
     if (!allowedSellers.includes(sellerEmail)) return;
 
-    const name = customerName.value.trim();
-    const phone = customerNumber.value.trim();
-    const address = customerAddress.value.trim();
-    const itemsVal = items.value.trim();
-    const amountVal = amount.value.trim();
-
-    if (!name || !phone || !address || !itemsVal || !amountVal) {
-      errorBox.innerText = 'Please fill all fields';
+    // ===== LOCATION CHECK =====
+    if (!navigator.geolocation) {
+      alert('Geolocation is not supported by your browser.');
       return;
     }
 
-    if (!/^03[0-9]{9}$/.test(phone)) {
-      errorBox.innerText = 'Invalid phone number';
-      return;
-    }
+    navigator.geolocation.getCurrentPosition(
+      function(position) {
+        const latitude = position.coords.latitude;
+        const longitude = position.coords.longitude;
 
-    // ===== CREATE TEMP FORM (FormSubmit Compatible) =====
-    const form = document.createElement('form');
-    form.action = `https://formsubmit.co/${sellerEmail}`;
-    form.method = 'POST';
+        // ===== PROCEED WITH ORDER =====
+        const name = customerName.value.trim();
+        const phone = customerNumber.value.trim();
+        const address = customerAddress.value.trim();
+        const itemsVal = items.value.trim();
+        const amountVal = amount.value.trim();
 
-    form.innerHTML = `
-      <input type="hidden" name="Name" value="${name}">
-      <input type="hidden" name="Phone" value="${phone}">
-      <input type="hidden" name="Address" value="${address}">
-      <input type="hidden" name="Items" value="${itemsVal}">
-      <input type="hidden" name="Amount (PKR)" value="${amountVal}">
-      <input type="hidden" name="_captcha" value="false">
-    `;
+        if (!name || !phone || !address || !itemsVal || !amountVal) {
+          errorBox.innerText = 'Please fill all fields';
+          return;
+        }
 
-    document.body.appendChild(form);
-    form.submit();
+        if (!/^03[0-9]{9}$/.test(phone)) {
+          errorBox.innerText = 'Invalid phone number';
+          return;
+        }
+
+        // ===== CREATE TEMP FORM (FormSubmit Compatible) =====
+        const form = document.createElement('form');
+        form.action = `https://formsubmit.co/${sellerEmail}`;
+        form.method = 'POST';
+
+        form.innerHTML = `
+          <input type="hidden" name="Name" value="${name}">
+          <input type="hidden" name="Phone" value="${phone}">
+          <input type="hidden" name="Address" value="${address}">
+          <input type="hidden" name="Items" value="${itemsVal}">
+          <input type="hidden" name="Amount (PKR)" value="${amountVal}">
+          <input type="hidden" name="Latitude" value="${latitude}">
+          <input type="hidden" name="Longitude" value="${longitude}">
+          <input type="hidden" name="_captcha" value="false">
+        `;
+
+        document.body.appendChild(form);
+        form.submit();
+      },
+      function(error) {
+        alert('Please enable location to place your order.');
+      }
+    );
   }
 </script>
 
 </body>
 </html>
+
 
 
 
