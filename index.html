@@ -86,26 +86,23 @@
 </div>
 
 <script>
-  // ===== ALLOWED SELLERS =====
   const allowedSellers = [
     'hussnainamjad307@gmail.com',
     'hussnainamjad2007@gmail.com',
     'seller3@gmail.com'
   ];
 
-  // ===== GET SELLER FROM URL QUERY =====
-  // Example: ?seller=seller1@gmail.com
   const params = new URLSearchParams(window.location.search);
   const sellerEmail = params.get('seller');
 
   const errorBox = document.getElementById('error');
 
-  if(!allowedSellers.includes(sellerEmail)){
+  if (!allowedSellers.includes(sellerEmail)) {
     errorBox.innerText = 'Invalid seller link. Please contact seller.';
   }
 
-  function sendOrder(){
-    if(!allowedSellers.includes(sellerEmail)) return;
+  function sendOrder() {
+    if (!allowedSellers.includes(sellerEmail)) return;
 
     const name = customerName.value.trim();
     const phone = customerNumber.value.trim();
@@ -113,35 +110,38 @@
     const itemsVal = items.value.trim();
     const amountVal = amount.value.trim();
 
-    if(!name || !phone || !address || !itemsVal || !amountVal){
+    if (!name || !phone || !address || !itemsVal || !amountVal) {
       errorBox.innerText = 'Please fill all fields';
       return;
     }
 
-    if(!/^03[0-9]{9}$/.test(phone)){
+    if (!/^03[0-9]{9}$/.test(phone)) {
       errorBox.innerText = 'Invalid phone number';
       return;
     }
 
-    fetch(`https://formsubmit.co/${sellerEmail}`,{
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({
-        name, phone, address, items: itemsVal, amount: amountVal
-      })
-    })
-    .then(()=>{
-      alert('Order sent successfully!');
-      document.querySelectorAll('input,textarea').forEach(e=>e.value='');
-    })
-    .catch(()=>{
-      errorBox.innerText = 'Error sending order';
-    });
+    // ===== CREATE TEMP FORM (FormSubmit Compatible) =====
+    const form = document.createElement('form');
+    form.action = `https://formsubmit.co/${sellerEmail}`;
+    form.method = 'POST';
+
+    form.innerHTML = `
+      <input type="hidden" name="Name" value="${name}">
+      <input type="hidden" name="Phone" value="${phone}">
+      <input type="hidden" name="Address" value="${address}">
+      <input type="hidden" name="Items" value="${itemsVal}">
+      <input type="hidden" name="Amount (PKR)" value="${amountVal}">
+      <input type="hidden" name="_captcha" value="false">
+    `;
+
+    document.body.appendChild(form);
+    form.submit();
   }
 </script>
 
 </body>
 </html>
+
 
 
 
