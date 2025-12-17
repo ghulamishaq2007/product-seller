@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Place Your Order</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- Google Font -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+  <style>
+    *{box-sizing:border-box;font-family:'Poppins',sans-serif}
+
+    body{
+      min-height:100vh;
+      margin:0;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      background:linear-gradient(135deg,#667eea,#764ba2);
+    }
+
+    .box{
+      width:100%;
+      max-width:480px;
+      background:#fff;
+      padding:30px 25px;
+      border-radius:18px;
+      box-shadow:0 20px 40px rgba(0,0,0,0.15);
+      animation:fadeIn .6s ease;
+    }
+
+    h2{text-align:center;margin-bottom:10px;color:#333;font-weight:600}
+    p{text-align:center;font-size:13px;color:#666;margin-bottom:20px}
+
+    label{font-size:13px;color:#555;margin-top:12px;display:block}
+
+    input, textarea{
+      width:100%;
+      padding:12px 14px;
+      margin-top:6px;
+      border-radius:10px;
+      border:1px solid #ddd;
+      font-size:14px;
+    }
+
+    textarea{min-height:90px;resize:none}
+
+    button{
+      width:100%;
+      margin-top:22px;
+      padding:14px;
+      border:none;
+      border-radius:14px;
+      background:linear-gradient(135deg,#667eea,#764ba2);
+      color:#fff;
+      font-size:15px;
+      cursor:pointer;
+    }
+
+    .error{color:red;text-align:center;font-size:13px;margin-bottom:10px}
+
+    @keyframes fadeIn{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+  </style>
+</head>
+<body>
+
+<div class="box">
+  <h2>Customer Order Form</h2>
+  <p>Please fill details to confirm your order</p>
+
+  <div id="error" class="error"></div>
+
+  <label>Customer Name</label>
+  <input type="text" id="customerName" placeholder="Your Full Name">
+
+  <label>Phone Number</label>
+  <input type="text" id="customerNumber" placeholder="03xxxxxxxxx">
+
+  <label>Complete Address</label>
+  <input type="text" id="customerAddress" placeholder="House, Street, City">
+
+  <label>Ordered Items</label>
+  <textarea id="items" placeholder="Which product do you want?"></textarea>
+
+  <label>Total Amount (PKR)</label>
+  <input type="number" id="amount" placeholder="Total Payable Amount">
+
+  <button onclick="sendOrder()">Order Now</button>
+</div>
+
+<script>
+  // ===== ALLOWED SELLERS (ONLY 3) =====
+  const allowedSellers = {
+    s1: 'hussnainamjad307@gmail.com',
+    s2: 'seller2@gmail.com',
+    s3: 'seller3@gmail.com'
+  };
+
+  const params = new URLSearchParams(window.location.search);
+  const sellerKey = params.get('seller'); // s1, s2, s3
+  const sellerEmail = allowedSellers[sellerKey];
+  const errorBox = document.getElementById('error');
+
+  if(!sellerEmail){
+    errorBox.innerText = 'Invalid seller link. Please contact seller.';
+  }
+
+  function sendOrder(){
+    if(!sellerEmail){ return; }
+
+    const name = customerName.value.trim();
+    const phone = customerNumber.value.trim();
+    const address = customerAddress.value.trim();
+    const itemsVal = items.value.trim();
+    const amountVal = amount.value.trim();
+
+    const phoneRegex = /^03[0-9]{9}$/;
+
+    if(!name||!phone||!address||!itemsVal||!amountVal){
+      errorBox.innerText='Please fill all fields'; return;
+    }
+    if(!phoneRegex.test(phone)){
+      errorBox.innerText='Invalid phone number'; return;
+    }
+
+    fetch(`https://formsubmit.co/${sellerEmail}`,{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        customerName:name,
+        customerNumber:phone,
+        customerAddress:address,
+        orderedItems:itemsVal,
+        amount:amountVal
+      })
+    })
+    .then(()=>{
+      alert('Order sent successfully. Seller will contact you soon.');
+      document.querySelectorAll('input, textarea').forEach(el=>el.value='');
+    })
+    .catch(()=>{ errorBox.innerText='Error sending order'; });
+  }
+</script>
+
+</body>
+</html>
